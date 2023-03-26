@@ -52,7 +52,7 @@ unsigned int Weight::getFlowHistorySize()
 
 void Weight::updateFlowHistory(float weight)
 {
-    for (int i = 0; i < this->flowHistorySize - 1; i++)
+    for (unsigned int i = 0; i < this->flowHistorySize - 1; i++)
     {
         this->flowHistory[i] = this->flowHistory[i + 1];
     }
