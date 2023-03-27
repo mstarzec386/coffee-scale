@@ -42,10 +42,11 @@ void loop()
   weight.update(scale.get_units(1));
 
   // TODO move to UI class
-  if (millis() - timeSinceLastUpdate > 100)
+  if (millis() - timeSinceLastUpdate > 50)
   {
     timeSinceLastUpdate = millis();
 
+    float rawWeight = weight.getRawWeight();
     float filteredWeight = weight.getWeight();
     float flow = weight.getFlow();
 
@@ -53,6 +54,9 @@ void loop()
 
     // TODO add timer
     // TODO move to draw weight
+    display.setFont(ArialMT_Plain_10);
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+    display.drawString(1, 1, String(rawWeight, 2) + String(" g"));
     display.setFont(ArialMT_Plain_24);
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.drawString(10, 10, String(filteredWeight, 1) + String(" g"));

@@ -2,11 +2,12 @@
 #include "Weight.h"
 
 Weight::Weight()
-    : kalmanFilter(1, 1, 0.1)
+    : kalmanFilter(0.1, 0.1, 0.1)
 {
     this->lastFlowWeight = 0;
     this->lastFlowCheck = millis();
-    this->filteredResult = 0;
+    this->rawWeight = 0;
+    this->filteredWeight = 0;
     this->flow = 0;
     this->flowHistorySize = 20;
     this->flowHistory = new float[this->flowHistorySize];
@@ -19,20 +20,26 @@ Weight::Weight()
 
 void Weight::update(float weight)
 {
-    this->filteredResult = this->kalmanFilter.updateEstimate(weight);
+    this->rawWeight = weight;
+    this->filteredWeight = this->kalmanFilter.updateEstimate(weight);
 
     if (millis() - this->lastFlowCheck > 1000)
     {
-        this->flow = this->filteredResult - this->lastFlowWeight;
-        this->lastFlowWeight = this->filteredResult;
+        this->flow = this->filteredWeight - this->lastFlowWeight;
+        this->lastFlowWeight = this->filteredWeight;
         this->lastFlowCheck = millis();
         this->updateFlowHistory(this->flow);
     }
 }
 
+float Weight::getRawWeight()
+{
+    return this->rawWeight;
+}
+
 float Weight::getWeight()
 {
-    return this->filteredResult;
+    return this->filteredWeight;
 }
 
 float Weight::getFlow()

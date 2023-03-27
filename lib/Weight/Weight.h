@@ -11,6 +11,7 @@ public:
     Weight();
 
     void update(float weight);
+    float getRawWeight();
     float getWeight();
     float getFlow();
     float* getFlowHistory();
@@ -19,7 +20,8 @@ public:
 private:
     long lastFlowCheck;
     float lastFlowWeight;
-    float filteredResult;
+    float rawWeight;
+    float filteredWeight;
     float flow;
     float *flowHistory;
     unsigned int flowHistorySize;
