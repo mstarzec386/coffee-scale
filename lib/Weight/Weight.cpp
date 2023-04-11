@@ -9,7 +9,7 @@ Weight::Weight()
     this->rawWeight = 0;
     this->filteredWeight = 0;
     this->flow = 0;
-    this->flowHistorySize = 20;
+    this->flowHistorySize = 30;
     this->flowHistory = new float[this->flowHistorySize];
 
     for (unsigned int i = 0; i < this->flowHistorySize; i++)
