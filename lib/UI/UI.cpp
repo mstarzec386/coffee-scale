@@ -24,10 +24,10 @@ void UI::update()
         do
         {
             display.setFont(u8g2_font_ncenB10_tr);
-            display.drawStr(1, 25, rawWeightStr.c_str());
-            display.drawStr(1, 40, flowStr.c_str());
-            display.setFont(u8g2_font_ncenB18_te);
-            display.drawStr(85, 30, filteredWeightStr.c_str());
+            display.drawStr(1, 45, rawWeightStr.c_str());
+            display.drawStr(1, 60, flowStr.c_str());
+            display.setFont(u8g2_font_ncenB24_tr);
+            display.drawStr(75, 50, filteredWeightStr.c_str());
 
             for (unsigned int i = 0; i < this->flowHistorySize; i++)
             {
