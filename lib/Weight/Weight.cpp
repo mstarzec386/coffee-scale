@@ -32,6 +32,11 @@ void Weight::update(float weight)
     }
 }
 
+// TODO
+void Weight::setTare()
+{
+}
+
 float Weight::getRawWeight()
 {
     return this->rawWeight;

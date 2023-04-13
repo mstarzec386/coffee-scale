@@ -11,6 +11,7 @@ public:
     Weight();
 
     void update(float weight);
+    void setTare();
     float getRawWeight();
     float getWeight();
     float getFlow();
