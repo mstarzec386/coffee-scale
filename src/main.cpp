@@ -8,7 +8,7 @@
 
 #include "bitmaps.h"
 
-const int LOADCELL_DOUT_PIN = D2;
+const int LOADCELL_DOUT_PIN = D2; // d6 can be used instead, d3 can't
 const int LOADCELL_SCK_PIN = D1;
 const int TARE_BUTTON_PIN = D6; // pullup dont work
 const int TIME_BUTTON_PIN = D3; // can't boot when connected to gnd :joy:
