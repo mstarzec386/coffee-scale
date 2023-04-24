@@ -1,6 +1,6 @@
 #include "UI.h"
 
-UI::UI(U8G2& u8g2): display(u8g2)
+UI::UI(U8G2 &u8g2) : display(u8g2)
 {
     this->lastUpdate = millis();
 };
@@ -18,17 +18,34 @@ void UI::update()
 
         String rawWeightStr = String(this->rawWeight, 2) + String(" g");
         String filteredWeightStr = String(this->filteredWeight, 1) + String("");
-        String flowStr = String(this->flowValue, 1) + String("g/s");
+        String flowStr = String(this->flowValue, 1);
+        ;
+
+        int timerTotalSeconds = this->getTimerSeconds();
+        int timerMinutes = timerTotalSeconds / 60;
+        int timerSeconds = timerTotalSeconds - 60 * timerMinutes;
+        String timeStr = String(timerMinutes) + String(":") + String(timerSeconds);
 
         display.firstPage();
         do
         {
             display.setFont(u8g2_font_ncenB10_tr);
-            display.drawStr(1, 45, rawWeightStr.c_str());
-            display.drawStr(1, 60, flowStr.c_str());
-            display.setFont(u8g2_font_ncenB24_tr);
-            display.drawStr(75, 50, filteredWeightStr.c_str());
+            // display.drawStr(1, 12, rawWeightStr.c_str());
 
+            display.setFont(u8g2_font_ncenB24_tr);
+            // Timer
+            display.drawStr(1, 60, timeStr.c_str());
+
+            // Weight
+            display.drawStr(1, 25, filteredWeightStr.c_str());
+
+            // Flow
+            display.setFont(u8g2_font_ncenB18_tr);
+            display.drawStr(120, 40, flowStr.c_str());
+            display.setFont(u8g2_font_ncenB12_tr);
+            display.drawStr(125, 55, String("g/s").c_str());
+
+            // TODO optimize
             for (unsigned int i = 0; i < this->flowHistorySize; i++)
             {
                 int round = (int)(this->flowHistory[i] * 10);
@@ -46,16 +63,33 @@ void UI::update()
                 display.drawCircle(256 - this->flowHistorySize * 2 + i * 2, 60 - mapped, 2);
             }
         } while (display.nextPage());
-
-        // TODO add timer
         // TODO move to draw weight
 
         // TODO move to drawFlow
     }
 }
 
-void UI::stopStartTimer() {}
-void UI::resetTimer() {}
+void UI::stopStartTimer()
+{
+    if (this->timerStarted)
+    {
+        this->additionalSeconds = this->getTimerSeconds();
+        this->timerStarted = false;
+    }
+    else
+    {
+        this->timerStart = millis();
+        this->timerStarted = true;
+    }
+}
+
+void UI::resetTimer()
+{
+    this->additionalSeconds = 0;
+    this->timerStart = millis();
+    this->timerStarted = false;
+}
+
 void UI::setWeight(float rawWeight, float filteredWeight)
 {
     this->rawWeight = rawWeight;
@@ -67,4 +101,18 @@ void UI::setFlow(float flowValue, float *flowHistory, unsigned int flowHistorySi
     this->flowValue = flowValue;
     this->flowHistory = flowHistory;
     this->flowHistorySize = flowHistorySize;
+}
+
+// Privates
+
+int UI::getTimerSeconds()
+{
+    int seconds = this->additionalSeconds;
+
+    if (this->timerStarted)
+    {
+        seconds += (millis() - this->timerStart) / 1000;
+    }
+
+    return seconds;
 }

@@ -21,12 +21,17 @@ public:
 
 private:
     U8G2& display;
-    long lastUpdate;
+    unsigned long lastUpdate;
+    unsigned long timerStart;
+    int additionalSeconds;
+    bool timerStarted;
     float rawWeight;
     float filteredWeight;
     float flowValue;
     float *flowHistory;
     unsigned int flowHistorySize;
+
+    int getTimerSeconds();
 };
 
 #endif
