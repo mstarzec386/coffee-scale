@@ -29,8 +29,10 @@ void UI::update()
         display.firstPage();
         do
         {
-            display.setFont(u8g2_font_ncenB10_tr);
-            // display.drawStr(1, 12, rawWeightStr.c_str());
+            display.setFont(u8g2_font_ncenB08_tr);
+
+            // Raw Weight
+            display.drawStr(80, 58, rawWeightStr.c_str());
 
             display.setFont(u8g2_font_ncenB24_tr);
             // Timer
@@ -41,9 +43,9 @@ void UI::update()
 
             // Flow
             display.setFont(u8g2_font_ncenB18_tr);
-            display.drawStr(120, 40, flowStr.c_str());
+            display.drawStr(120, 33, flowStr.c_str());
             display.setFont(u8g2_font_ncenB12_tr);
-            display.drawStr(125, 55, String("g/s").c_str());
+            display.drawStr(130, 48, String("g/s").c_str());
 
             // TODO optimize
             for (unsigned int i = 0; i < this->flowHistorySize; i++)

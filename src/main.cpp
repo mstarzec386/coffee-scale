@@ -1,37 +1,83 @@
 
 #include <U8g2lib.h>
-#include "HX711.h"
 #include "OneButton.h"
+#include <Wire.h>
+#include "SparkFun_Qwiic_Scale_NAU7802_Arduino_Library.h"
 
 #include "Weight.h"
 #include "UI.h"
 
 #include "bitmaps.h"
 
-const int LOADCELL_DOUT_PIN = D2; // d6 can be used instead, d3 can't
+const int LOADCELL_DOUT_PIN = D2;
 const int LOADCELL_SCK_PIN = D1;
-const int TARE_BUTTON_PIN = 10; // can't boot when connected to gnd :joy:
-const int TIME_BUTTON_PIN = D3; // external pull-up
+const int TARE_BUTTON_PIN = 10;
+const int TIME_BUTTON_PIN = D3;
 
 OneButton timeButton(TIME_BUTTON_PIN);
+OneButton tareButton(TARE_BUTTON_PIN);
 
 U8G2_SH1122_256X64_1_4W_HW_SPI display(U8G2_R0, /* cs=*/D8, /* dc=*/D4, /* reset=*/D0);
-// U8G2_SH1122_256X64_1_3W_SW_SPI display(U8G2_R0, /* cs=*/D8, /* dc=*/D4, /* reset=*/D0);
 
-HX711 scale;
+NAU7802 scale;
 Weight weight;
 UI ui(display);
 
 long timeSinceLastUpdate = 0;
 
-void timeButtonSinglePressed() {
-  Serial.printf("timeButtonPressed\n");
+void timeButtonSinglePressed()
+{
   ui.stopStartTimer();
 }
 
-void timeButtonLongPressed() {
-  Serial.printf("timeButtonPressed\n");
+void timeButtonLongPressed()
+{
   ui.resetTimer();
+}
+
+void tareButtonSinglePressed()
+{
+    scale.calculateZeroOffset();
+}
+
+void calibrateScale(void)
+{
+  Serial.println();
+  Serial.println();
+  Serial.println(F("Scale calibration"));
+
+  Serial.println(F("Setup scale with no weight on it. Press a key when ready."));
+  while (Serial.available())
+    Serial.read(); // Clear anything in RX buffer
+  while (Serial.available() == 0)
+    delay(10); // Wait for user to press key
+
+  scale.calculateZeroOffset(64); // Zero or Tare the scale. Average over 64 readings.
+  Serial.print(F("New zero offset: "));
+  Serial.println(scale.getZeroOffset());
+
+  Serial.println(F("Place known weight on scale. Press a key when weight is in place and stable."));
+  while (Serial.available())
+    Serial.read(); // Clear anything in RX buffer
+  while (Serial.available() == 0)
+    delay(10); // Wait for user to press key
+
+  Serial.print(F("Please enter the weight, without units, currently sitting on the scale (for example '4.25'): "));
+  while (Serial.available())
+    Serial.read(); // Clear anything in RX buffer
+  while (Serial.available() == 0)
+    delay(10); // Wait for user to press key
+
+  // Read user input
+  float weightOnScale = Serial.parseFloat();
+  Serial.println();
+
+  scale.calculateCalibrationFactor(weightOnScale, 64); // Tell the library how much weight is currently on it
+  Serial.print(F("New cal factor: "));
+  Serial.println(scale.getCalibrationFactor(), 2);
+
+  Serial.print(F("New Scale Reading: "));
+  Serial.println(scale.getWeight(), 2);
 }
 
 void setup()
@@ -39,38 +85,54 @@ void setup()
   Serial.begin(115200);
   Serial.println();
   Serial.println();
-  pinMode(TARE_BUTTON_PIN, INPUT_PULLUP);
-  // pinMode(TIME_BUTTON_PIN, INPUT_PULLUP);
 
+  Wire.begin();
+  if (scale.begin() == false)
+  {
+    Serial.println("Scale not detected. Please check wiring. Freezing...");
+    while (1)
+      ;
+  }
+  Serial.println("Scale detected!");
+
+  // TODO EEPROM
+  scale.calculateZeroOffset(64);
+  scale.setCalibrationFactor(981.44);
 
   timeButton.attachClick(timeButtonSinglePressed);
   timeButton.attachLongPressStart(timeButtonLongPressed);
+  tareButton.attachClick(tareButtonSinglePressed);
   display.begin();
 
   delay(500);
 
-  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
   delay(500);
-  scale.set_scale(429.56f); // 5kg
-  scale.tare();
   ui.resetTimer();
 }
 
 void loop()
 {
   timeButton.tick();
+  tareButton.tick();
 
-  if (digitalRead(TARE_BUTTON_PIN) == LOW) {
-    scale.tare();
+  if (Serial.available())
+  {
+    byte incoming = Serial.read();
+
+    if (incoming == 't') // Tare the scale
+      scale.calculateZeroOffset();
+    else if (incoming == 'c') // Calibrate
+    {
+      calibrateScale();
+    }
   }
 
-  // if (digitalRead(TIME_BUTTON_PIN) == LOW) {
-  //   ui.stopStartTimer();
-  // }
+  if (scale.available() == true)
+  {
+    float currentWeight = scale.getWeight();
+    weight.update(currentWeight);
+  }
 
-  Serial.println(timeButton.getNumberClicks());
-
-  weight.update(scale.get_units(1));
   ui.setWeight(weight.getRawWeight(), weight.getWeight());
   ui.setFlow(weight.getFlow(), weight.getFlowHistory(), weight.getFlowHistorySize());
   ui.update();
