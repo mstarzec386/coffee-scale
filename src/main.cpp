@@ -13,6 +13,7 @@ const int LOADCELL_DOUT_PIN = D2;
 const int LOADCELL_SCK_PIN = D1;
 const int TARE_BUTTON_PIN = 10;
 const int TIME_BUTTON_PIN = D3;
+const int BATTERY_ADC_PIN = A0;
 
 OneButton timeButton(TIME_BUTTON_PIN);
 OneButton tareButton(TARE_BUTTON_PIN);
@@ -115,6 +116,7 @@ void loop()
   timeButton.tick();
   tareButton.tick();
 
+
   if (Serial.available())
   {
     byte incoming = Serial.read();
@@ -133,6 +135,9 @@ void loop()
     weight.update(currentWeight);
   }
 
+  int batteryRaw = analogRead(BATTERY_ADC_PIN);
+  float batteryVoltage = (float)map(batteryRaw, 0, 894, 0, 408)/100.0;
+  Serial.println(batteryVoltage);
   ui.setWeight(weight.getRawWeight(), weight.getWeight());
   ui.setFlow(weight.getFlow(), weight.getFlowHistory(), weight.getFlowHistorySize());
   ui.update();
