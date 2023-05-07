@@ -105,10 +105,9 @@ void setup()
   tareButton.attachClick(tareButtonSinglePressed);
   display.begin();
 
-  delay(500);
-
-  delay(500);
   ui.resetTimer();
+  ui.initialScreen();
+  delay(500);
 }
 
 void loop()
@@ -138,6 +137,7 @@ void loop()
   int batteryRaw = analogRead(BATTERY_ADC_PIN);
   float batteryVoltage = (float)map(batteryRaw, 0, 894, 0, 408)/100.0;
   Serial.println(batteryVoltage);
+  ui.setBatteryVoltage(batteryVoltage);
   ui.setWeight(weight.getRawWeight(), weight.getWeight());
   ui.setFlow(weight.getFlow(), weight.getFlowHistory(), weight.getFlowHistorySize());
   ui.update();

@@ -24,6 +24,7 @@ private:
     float rawWeight;
     float filteredWeight;
     float flow;
+    float prevFlow;
     float *flowHistory;
     unsigned int flowHistorySize;
     SimpleKalmanFilter kalmanFilter;

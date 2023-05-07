@@ -9,7 +9,7 @@ Weight::Weight()
     this->rawWeight = 0;
     this->filteredWeight = 0;
     this->flow = 0;
-    this->flowHistorySize = 30;
+    this->flowHistorySize = 110;
     this->flowHistory = new float[this->flowHistorySize];
 
     for (unsigned int i = 0; i < this->flowHistorySize; i++)
@@ -23,8 +23,9 @@ void Weight::update(float weight)
     this->rawWeight = weight;
     this->filteredWeight = this->kalmanFilter.updateEstimate(weight);
 
-    if (millis() - this->lastFlowCheck > 1000)
+    if (millis() - this->lastFlowCheck > 500)
     {
+        this->prevFlow = this->flow;
         this->flow = this->filteredWeight - this->lastFlowWeight;
         this->lastFlowWeight = this->filteredWeight;
         this->lastFlowCheck = millis();

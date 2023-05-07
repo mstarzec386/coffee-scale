@@ -10,42 +10,48 @@ void UI::setDisplay(U8G2 &display)
     this->display = display;
 }
 
+void UI::initialScreen()
+{
+    display.firstPage();
+    do
+    {
+        display.setFont(u8g2_font_ncenB24_tr);
+        display.drawStr(40, 30, "Coffe Scale");
+    } while (display.nextPage());
+}
+
 void UI::update()
 {
     if (millis() - this->lastUpdate > 50)
     {
         this->lastUpdate = millis();
 
-        String rawWeightStr = String(this->rawWeight, 2) + String(" g");
+        String timeStr = this->getTimerStr();
         String filteredWeightStr = String(this->filteredWeight, 1) + String("");
-        String flowStr = String(this->flowValue, 1);
-        ;
-
-        int timerTotalSeconds = this->getTimerSeconds();
-        int timerMinutes = timerTotalSeconds / 60;
-        int timerSeconds = timerTotalSeconds - 60 * timerMinutes;
-        String timeStr = String(timerMinutes) + String(":") + String(timerSeconds);
+        String flowStr;
+        if (this->flowValue > 20)
+        {
+            flowStr += String(this->flowValue, 0);
+        }
+        else
+        {
+            flowStr += String(this->flowValue, 1);
+        }
 
         display.firstPage();
         do
         {
-            display.setFont(u8g2_font_ncenB08_tr);
-
-            // Raw Weight
-            display.drawStr(80, 58, rawWeightStr.c_str());
-
             display.setFont(u8g2_font_ncenB24_tr);
             // Timer
             display.drawStr(1, 60, timeStr.c_str());
 
             // Weight
+            // TODO fixed size -> getFilteredWeightStr()!
             display.drawStr(1, 25, filteredWeightStr.c_str());
 
             // Flow
             display.setFont(u8g2_font_ncenB18_tr);
-            display.drawStr(120, 33, flowStr.c_str());
-            display.setFont(u8g2_font_ncenB12_tr);
-            display.drawStr(130, 48, String("g/s").c_str());
+            display.drawStr(90, 60, flowStr.c_str());
 
             // TODO optimize
             for (unsigned int i = 0; i < this->flowHistorySize; i++)
@@ -62,7 +68,7 @@ void UI::update()
                     mapped = 0;
                 }
 
-                display.drawCircle(256 - this->flowHistorySize * 2 + i * 2, 60 - mapped, 2);
+                display.drawCircle(256 - this->flowHistorySize + i, 60 - mapped, 1);
             }
         } while (display.nextPage());
         // TODO move to draw weight
@@ -100,9 +106,22 @@ void UI::setWeight(float rawWeight, float filteredWeight)
 
 void UI::setFlow(float flowValue, float *flowHistory, unsigned int flowHistorySize)
 {
-    this->flowValue = flowValue;
+    if (flowValue < 0)
+    {
+        this->flowValue = 0;
+    }
+    else
+    {
+        this->flowValue = flowValue;
+    }
+
     this->flowHistory = flowHistory;
     this->flowHistorySize = flowHistorySize;
+}
+
+void UI::setBatteryVoltage(float batteryVoltage)
+{
+    this->batteryVoltage = batteryVoltage;
 }
 
 // Privates
@@ -117,4 +136,23 @@ int UI::getTimerSeconds()
     }
 
     return seconds;
+}
+
+String UI::getTimerStr()
+{
+    int timerTotalSeconds = this->getTimerSeconds();
+    int timerMinutes = timerTotalSeconds / 60;
+    int timerSeconds = timerTotalSeconds - 60 * timerMinutes;
+    String timeStr = String(timerMinutes) + String(":");
+
+    if (timerSeconds < 10)
+    {
+        timeStr += String("0") + String(timerSeconds);
+    }
+    else
+    {
+        timeStr += String(timerSeconds);
+    }
+
+    return timeStr;
 }
