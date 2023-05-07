@@ -57,7 +57,7 @@ void UI::update()
             for (unsigned int i = 0; i < this->flowHistorySize; i++)
             {
                 int round = (int)(this->flowHistory[i] * 10);
-                int mapped = map(round, 0, 200, 0, 64);
+                int mapped = map(round, 0, 200, 0, 60);
                 if (mapped > 60)
                 {
                     mapped = 60;
@@ -68,7 +68,7 @@ void UI::update()
                     mapped = 0;
                 }
 
-                display.drawCircle(256 - this->flowHistorySize + i, 60 - mapped, 1);
+                display.drawCircle(256 - this->flowHistorySize + i, 62 - mapped, 1);
             }
         } while (display.nextPage());
         // TODO move to draw weight
