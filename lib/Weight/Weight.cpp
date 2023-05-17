@@ -26,7 +26,7 @@ void Weight::update(float weight)
     if (millis() - this->lastFlowCheck > 500)
     {
         this->prevFlow = this->flow;
-        this->flow = this->filteredWeight - this->lastFlowWeight;
+        this->flow = (this->filteredWeight - this->lastFlowWeight) * 2; // because we messure in 500ms
         this->lastFlowWeight = this->filteredWeight;
         this->lastFlowCheck = millis();
         this->updateFlowHistory(this->flow);

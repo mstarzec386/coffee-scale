@@ -10,13 +10,17 @@ void UI::setDisplay(U8G2 &display)
     this->display = display;
 }
 
-void UI::initialScreen()
+void UI::initialScreen(float batteryVoltage)
 {
+
+    String batteryVoltageStr = String(batteryVoltage, 2);
     display.firstPage();
     do
     {
         display.setFont(u8g2_font_ncenB24_tr);
         display.drawStr(40, 30, "Coffe Scale");
+        display.setFont(u8g2_font_ncenB12_tr);
+        display.drawStr(120, 55, batteryVoltageStr.c_str());
     } while (display.nextPage());
 }
 

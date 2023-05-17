@@ -104,9 +104,13 @@ void setup()
   timeButton.attachLongPressStart(timeButtonLongPressed);
   tareButton.attachClick(tareButtonSinglePressed);
   display.begin();
+  delay(500);
 
+  int batteryRaw = analogRead(BATTERY_ADC_PIN);
+  float batteryVoltage = (float)map(batteryRaw, 0, 894, 0, 408)/100.0;
+  Serial.println(batteryVoltage);
   ui.resetTimer();
-  ui.initialScreen();
+  ui.initialScreen(batteryVoltage);
   delay(500);
 }
 

@@ -14,7 +14,7 @@ public:
     UI(U8G2& u8g2);
 
     void update();
-    void initialScreen();
+    void initialScreen(float batteryVoltage);
     void setDisplay(U8G2& display);
     void stopStartTimer();
     void resetTimer();
