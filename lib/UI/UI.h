@@ -21,6 +21,7 @@ public:
     void setWeight(float rawWeight, float filteredWeight);
     void setFlow(float flowValue, float *flowHistory, unsigned int flowHistorySize);
     void setBatteryVoltage(float batteryVoltage);
+    void switchMode();
 
 private:
     U8G2& display;
@@ -28,9 +29,12 @@ private:
     unsigned long timerStart;
     int additionalSeconds;
     bool timerStarted;
+    bool autoTimerStarted;
+    bool espressoMode;
     float rawWeight;
     float filteredWeight;
     float flowValue;
+    int flowScaleMax;
     float *flowHistory;
     float batteryVoltage;
     unsigned int flowHistorySize;

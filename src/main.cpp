@@ -41,6 +41,11 @@ void tareButtonSinglePressed()
     scale.calculateZeroOffset();
 }
 
+void tareButtonLongPressed()
+{
+    ui.switchMode();
+}
+
 void calibrateScale(void)
 {
   Serial.println();
@@ -103,6 +108,7 @@ void setup()
   timeButton.attachClick(timeButtonSinglePressed);
   timeButton.attachLongPressStart(timeButtonLongPressed);
   tareButton.attachClick(tareButtonSinglePressed);
+  tareButton.attachLongPressStart(tareButtonLongPressed);
   display.begin();
   delay(500);
 

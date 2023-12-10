@@ -3,6 +3,9 @@
 UI::UI(U8G2 &u8g2) : display(u8g2)
 {
     this->lastUpdate = millis();
+    this->espressoMode = false;
+    this->flowScaleMax = 200;
+    this->autoTimerStarted = false;
 };
 
 void UI::setDisplay(U8G2 &display)
@@ -12,7 +15,6 @@ void UI::setDisplay(U8G2 &display)
 
 void UI::initialScreen(float batteryVoltage)
 {
-
     String batteryVoltageStr = String(batteryVoltage, 2);
     display.firstPage();
     do
@@ -30,9 +32,27 @@ void UI::update()
     {
         this->lastUpdate = millis();
 
+        if (!this->autoTimerStarted && this->espressoMode && this->filteredWeight > 0.3)
+        {
+            this->timerStart = millis();
+            this->timerStarted = true;
+            this->autoTimerStarted = true;
+        }
+
         String timeStr = this->getTimerStr();
         String filteredWeightStr = String(this->filteredWeight, 1) + String("");
         String flowStr;
+        String modeStr;
+
+        if (this->espressoMode)
+        {
+            modeStr = "E";
+        }
+        else
+        {
+            modeStr = "D";
+        }
+
         if (this->flowValue > 20)
         {
             flowStr += String(this->flowValue, 0);
@@ -57,11 +77,15 @@ void UI::update()
             display.setFont(u8g2_font_ncenB18_tr);
             display.drawStr(90, 60, flowStr.c_str());
 
+            // Mode
+            display.setFont(u8g2_font_ncenB08_tr);
+            display.drawStr(120, 10, modeStr.c_str());
+
             // TODO optimize
             for (unsigned int i = 0; i < this->flowHistorySize; i++)
             {
                 int round = (int)(this->flowHistory[i] * 10);
-                int mapped = map(round, 0, 200, 0, 60);
+                int mapped = map(round, 0, this->flowScaleMax, 0, 60);
                 if (mapped > 60)
                 {
                     mapped = 60;
@@ -95,6 +119,20 @@ void UI::stopStartTimer()
     }
 }
 
+void UI::switchMode()
+{
+    this->espressoMode ^= 1;
+
+    if (this->espressoMode)
+    {
+        this->flowScaleMax = 50;
+        this->autoTimerStarted = false;
+    }
+    else
+    {
+        this->flowScaleMax = 200;
+    }
+}
 void UI::resetTimer()
 {
     this->additionalSeconds = 0;
