@@ -5,7 +5,7 @@ UI::UI(U8G2 &u8g2) : display(u8g2)
     this->lastUpdate = millis();
     this->espressoMode = false;
     this->flowScaleMax = 200;
-    this->autoTimerStarted = false;
+    this->autoTimerEnabled = false;
 };
 
 void UI::setDisplay(U8G2 &display)
@@ -32,11 +32,11 @@ void UI::update()
     {
         this->lastUpdate = millis();
 
-        if (!this->autoTimerStarted && this->espressoMode && this->filteredWeight > 0.3)
+        if (this->autoTimerEnabled && this->filteredWeight > 0.3)
         {
             this->timerStart = millis();
             this->timerStarted = true;
-            this->autoTimerStarted = true;
+            this->autoTimerEnabled = false;
         }
 
         String timeStr = this->getTimerStr();
@@ -51,6 +51,10 @@ void UI::update()
         else
         {
             modeStr = "D";
+        }
+        if (this->autoTimerEnabled)
+        {
+            modeStr += "A";
         }
 
         if (this->flowValue > 20)
@@ -112,21 +116,26 @@ void UI::stopStartTimer()
         this->additionalSeconds = this->getTimerSeconds();
         this->timerStarted = false;
     }
+    else if (!this->autoTimerEnabled && this->additionalSeconds == 0)
+    {
+        this->autoTimerEnabled = true;
+    }
     else
     {
         this->timerStart = millis();
         this->timerStarted = true;
+        this->autoTimerEnabled = false;
     }
 }
 
 void UI::switchMode()
 {
     this->espressoMode ^= 1;
+    this->autoTimerEnabled = false;
 
     if (this->espressoMode)
     {
         this->flowScaleMax = 50;
-        this->autoTimerStarted = false;
     }
     else
     {

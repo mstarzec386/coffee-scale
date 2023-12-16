@@ -29,7 +29,7 @@ private:
     unsigned long timerStart;
     int additionalSeconds;
     bool timerStarted;
-    bool autoTimerStarted;
+    bool autoTimerEnabled;
     bool espressoMode;
     float rawWeight;
     float filteredWeight;
