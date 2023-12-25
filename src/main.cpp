@@ -22,7 +22,7 @@ U8G2_SH1122_256X64_1_4W_HW_SPI display(U8G2_R0, /* cs=*/D8, /* dc=*/D4, /* reset
 
 NAU7802 scale;
 Weight weight;
-UI ui(display);
+UI ui(display, weight);
 
 long timeSinceLastUpdate = 0;
 
@@ -144,11 +144,10 @@ void loop()
     weight.update(currentWeight);
   }
 
+  // TODO move to function
   int batteryRaw = analogRead(BATTERY_ADC_PIN);
   float batteryVoltage = (float)map(batteryRaw, 0, 894, 0, 408)/100.0;
   Serial.println(batteryVoltage);
   ui.setBatteryVoltage(batteryVoltage);
-  ui.setWeight(weight.getRawWeight(), weight.getWeight());
-  ui.setFlow(weight.getFlow(), weight.getFlowHistory(), weight.getFlowHistorySize());
   ui.update();
 }
