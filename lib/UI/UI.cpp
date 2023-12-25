@@ -68,46 +68,7 @@ void UI::update()
             flowStr += String(this->flowValue, 1);
         }
 
-        display.firstPage();
-        do
-        {
-            display.setFont(u8g2_font_ncenB24_tr);
-            // Timer
-            display.drawStr(1, 60, timeStr.c_str());
-
-            // Weight
-            // TODO fixed size -> getFilteredWeightStr()!
-            display.drawStr(1, 25, filteredWeightStr.c_str());
-
-            // Flow
-            display.setFont(u8g2_font_ncenB18_tr);
-            display.drawStr(90, 60, flowStr.c_str());
-
-            // Mode
-            display.setFont(u8g2_font_ncenB08_tr);
-            display.drawStr(120, 10, modeStr.c_str());
-
-            // TODO optimize
-            for (unsigned int i = 0; i < this->flowHistorySize; i++)
-            {
-                int round = (int)(this->flowHistory[i] * 10);
-                int mapped = map(round, 0, this->flowScaleMax, 0, 60);
-                if (mapped > 60)
-                {
-                    mapped = 60;
-                }
-
-                if (mapped < 0)
-                {
-                    mapped = 0;
-                }
-
-                display.drawCircle(256 - this->flowHistorySize + i, 62 - mapped, 1);
-            }
-        } while (display.nextPage());
-        // TODO move to draw weight
-
-        // TODO move to drawFlow
+        this->draw(timeStr, filteredWeightStr, flowStr, modeStr);
     }
 }
 
@@ -175,6 +136,47 @@ void UI::setBatteryVoltage(float batteryVoltage)
 }
 
 // Privates
+
+void UI::draw(String timeStr, String filteredWeightStr, String flowStr, String modeStr)
+{
+    display.firstPage();
+    do
+    {
+        display.setFont(u8g2_font_ncenB24_tr);
+        // Timer
+        display.drawStr(1, 60, timeStr.c_str());
+
+        // Weight
+        // TODO fixed size -> getFilteredWeightStr()!
+        display.drawStr(1, 25, filteredWeightStr.c_str());
+
+        // Flow
+        display.setFont(u8g2_font_ncenB18_tr);
+        display.drawStr(90, 60, flowStr.c_str());
+
+        // Mode
+        display.setFont(u8g2_font_ncenB08_tr);
+        display.drawStr(120, 10, modeStr.c_str());
+
+        // TODO optimize  && can be moved to separate function
+        for (unsigned int i = 0; i < this->flowHistorySize; i++)
+        {
+            int round = (int)(this->flowHistory[i] * 10);
+            int mapped = map(round, 0, this->flowScaleMax, 0, 60);
+            if (mapped > 60)
+            {
+                mapped = 60;
+            }
+
+            if (mapped < 0)
+            {
+                mapped = 0;
+            }
+
+            display.drawCircle(256 - this->flowHistorySize + i, 62 - mapped, 1);
+        }
+    } while (display.nextPage());
+}
 
 int UI::getTimerSeconds()
 {
