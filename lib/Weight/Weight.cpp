@@ -23,6 +23,7 @@ void Weight::update(float weight)
     this->rawWeight = weight;
     this->filteredWeight = this->kalmanFilter.updateEstimate(weight);
 
+    // TODO move 500ms to variable, '* 2' should base on this variable
     if (millis() - this->lastFlowCheck > 500)
     {
         this->prevFlow = this->flow;
@@ -53,7 +54,7 @@ float Weight::getFlow()
     return this->flow;
 }
 
-float* Weight::getFlowHistory()
+float *Weight::getFlowHistory()
 {
     return this->flowHistory;
 }

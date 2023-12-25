@@ -40,6 +40,9 @@ private:
     unsigned int flowHistorySize;
 
     int getTimerSeconds();
+    void stopOnFinish();
+    void startTimer();
+    void stopTimer();
     String getTimerStr();
 };
 

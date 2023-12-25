@@ -28,15 +28,15 @@ void UI::initialScreen(float batteryVoltage)
 
 void UI::update()
 {
+    // TODO create const for this magic number
     if (millis() - this->lastUpdate > 50)
     {
         this->lastUpdate = millis();
 
+        // TODO create const for this magic number
         if (this->autoTimerEnabled && this->filteredWeight > 0.3)
         {
-            this->timerStart = millis();
-            this->timerStarted = true;
-            this->autoTimerEnabled = false;
+            this->startTimer();
         }
 
         String timeStr = this->getTimerStr();
@@ -47,6 +47,8 @@ void UI::update()
         if (this->espressoMode)
         {
             modeStr = "E";
+
+            this->stopOnFinish();
         }
         else
         {
@@ -113,8 +115,7 @@ void UI::stopStartTimer()
 {
     if (this->timerStarted)
     {
-        this->additionalSeconds = this->getTimerSeconds();
-        this->timerStarted = false;
+        this->stopTimer();
     }
     else if (!this->autoTimerEnabled && this->additionalSeconds == 0)
     {
@@ -122,9 +123,7 @@ void UI::stopStartTimer()
     }
     else
     {
-        this->timerStart = millis();
-        this->timerStarted = true;
-        this->autoTimerEnabled = false;
+        this->startTimer();
     }
 }
 
@@ -187,6 +186,27 @@ int UI::getTimerSeconds()
     }
 
     return seconds;
+}
+
+void UI::stopOnFinish()
+{
+    if (this->getTimerSeconds() > 10 && (this->flowHistory[this->flowHistorySize - 1] + this->flowHistory[this->flowHistorySize - 2]) < 0.2)
+    {
+        this->stopTimer();
+    }
+}
+
+void UI::startTimer()
+{
+    this->timerStart = millis();
+    this->timerStarted = true;
+    this->autoTimerEnabled = false;
+}
+
+void UI::stopTimer()
+{
+    this->additionalSeconds = this->getTimerSeconds();
+    this->timerStarted = false;
 }
 
 String UI::getTimerStr()
