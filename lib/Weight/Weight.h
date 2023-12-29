@@ -4,7 +4,6 @@
 #include <SimpleKalmanFilter.h>
 #include "Arduino.h"
 
-
 class Weight
 {
 public:
@@ -15,7 +14,7 @@ public:
     float getRawWeight();
     float getWeight();
     float getFlow();
-    float* getFlowHistory();
+    float *getFlowHistory();
     unsigned int getFlowHistorySize();
 
 private:

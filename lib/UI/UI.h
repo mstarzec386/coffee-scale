@@ -39,7 +39,11 @@ private:
     float batteryVoltage;
     unsigned int flowHistorySize;
 
+    void draw(String timeStr, String filteredWeightStr, String flowStr, String modeStr);
     int getTimerSeconds();
+    void stopOnFinish();
+    void startTimer();
+    void stopTimer();
     String getTimerStr();
 };
 
