@@ -1,17 +1,12 @@
 #include "UI.h"
 
-UI::UI(U8G2 &u8g2) : display(u8g2)
+UI::UI(U8G2 &u8g2, Weight &weight) : display(u8g2), weight(weight)
 {
     this->lastUpdate = millis();
     this->espressoMode = false;
     this->flowScaleMax = 200;
     this->autoTimerEnabled = false;
 };
-
-void UI::setDisplay(U8G2 &display)
-{
-    this->display = display;
-}
 
 void UI::initialScreen(float batteryVoltage)
 {
@@ -29,18 +24,21 @@ void UI::initialScreen(float batteryVoltage)
 void UI::update()
 {
     // TODO create const for this magic number
+    float flow = this->weight.getFlow();
+    float filteredWeight = this->weight.getWeight();
+
     if (millis() - this->lastUpdate > 50)
     {
         this->lastUpdate = millis();
 
         // TODO create const for this magic number
-        if (this->autoTimerEnabled && this->filteredWeight > 0.3)
+        if (this->autoTimerEnabled && filteredWeight > 0.3)
         {
             this->startTimer();
         }
 
         String timeStr = this->getTimerStr();
-        String filteredWeightStr = String(this->filteredWeight, 1) + String("");
+        String filteredWeightStr = String(filteredWeight, 1) + String("");
         String flowStr;
         String modeStr;
 
@@ -59,13 +57,13 @@ void UI::update()
             modeStr += "A";
         }
 
-        if (this->flowValue > 20)
+        if (flow > 20)
         {
-            flowStr += String(this->flowValue, 0);
+            flowStr += String(flow, 0);
         }
         else
         {
-            flowStr += String(this->flowValue, 1);
+            flowStr += String(flow, 1);
         }
 
         this->draw(timeStr, filteredWeightStr, flowStr, modeStr);
@@ -109,27 +107,6 @@ void UI::resetTimer()
     this->timerStarted = false;
 }
 
-void UI::setWeight(float rawWeight, float filteredWeight)
-{
-    this->rawWeight = rawWeight;
-    this->filteredWeight = filteredWeight;
-}
-
-void UI::setFlow(float flowValue, float *flowHistory, unsigned int flowHistorySize)
-{
-    if (flowValue < 0)
-    {
-        this->flowValue = 0;
-    }
-    else
-    {
-        this->flowValue = flowValue;
-    }
-
-    this->flowHistory = flowHistory;
-    this->flowHistorySize = flowHistorySize;
-}
-
 void UI::setBatteryVoltage(float batteryVoltage)
 {
     this->batteryVoltage = batteryVoltage;
@@ -158,10 +135,12 @@ void UI::draw(String timeStr, String filteredWeightStr, String flowStr, String m
         display.setFont(u8g2_font_ncenB08_tr);
         display.drawStr(120, 10, modeStr.c_str());
 
+        float *flowHistory = this->weight.getFlowHistory();
+        unsigned int flowHistorySize = this->weight.getFlowHistorySize();
         // TODO optimize  && can be moved to separate function
-        for (unsigned int i = 0; i < this->flowHistorySize; i++)
+        for (unsigned int i = 0; i < flowHistorySize; i++)
         {
-            int round = (int)(this->flowHistory[i] * 10);
+            int round = (int)(flowHistory[i] * 10);
             int mapped = map(round, 0, this->flowScaleMax, 0, 60);
             if (mapped > 60)
             {
@@ -173,7 +152,7 @@ void UI::draw(String timeStr, String filteredWeightStr, String flowStr, String m
                 mapped = 0;
             }
 
-            display.drawCircle(256 - this->flowHistorySize + i, 62 - mapped, 1);
+            display.drawCircle(256 - flowHistorySize + i, 62 - mapped, 1);
         }
     } while (display.nextPage());
 }
@@ -192,7 +171,10 @@ int UI::getTimerSeconds()
 
 void UI::stopOnFinish()
 {
-    if (this->getTimerSeconds() > 10 && (this->flowHistory[this->flowHistorySize - 1] + this->flowHistory[this->flowHistorySize - 2]) < 0.2)
+    float *flowHistory = this->weight.getFlowHistory();
+    unsigned int flowHistorySize = this->weight.getFlowHistorySize();
+
+    if (this->getTimerSeconds() > 10 && (flowHistory[flowHistorySize - 1] + flowHistory[flowHistorySize - 2]) < 0.2)
     {
         this->stopTimer();
     }
